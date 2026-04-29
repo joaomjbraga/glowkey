@@ -57,7 +57,7 @@ Se não aconteceu nada nos dois comandos, infelizmente seu teclado usa outro mec
 
 Você vai precisar de:
 
-- Linux com sessão **X11** ativa (Wayland ainda não é suportado — mais sobre isso abaixo)
+- Linux com sessão **X11** ativa (Wayland ainda não é suportado, mais sobre isso abaixo)
 - O utilitário `xset`, que provavelmente já está instalado, mas se não estiver:
 
 ```bash
@@ -130,25 +130,9 @@ Vá em **Configurações → Teclado → Atalhos personalizados** e adicione:
 O GlowKey salva automaticamente o estado do backlight toda vez que você usa `on`, `off` ou `toggle`. No próximo login, o estado será restaurado automaticamente via XDG Autostart.
 
 Para desativar a auto-inicialização, remova o arquivo:
+
 ```bash
 rm ~/.config/autostart/glowkey.desktop
-```
-
----
-
-## Estrutura do projeto
-
-```text
-glowkey/
-├── .github/
-│   ├── banner.png
-│   ├── exemplo.png
-│   └── exemplo2.webp
-├── glowkey.sh
-├── install.sh
-├── uninstall.sh
-├── README.md
-└── LICENSE
 ```
 
 ---
