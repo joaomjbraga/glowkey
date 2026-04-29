@@ -2,6 +2,6 @@
 Type=Application
 Name=GlowKey Backlight Restore
 Comment=Restaura o estado do backlight do teclado no login
-Exec=$HOME/.local/share/glowkey restore
+Exec=@GLOWKEY_PATH@ restore
 NoDisplay=true
 X-GNOME-Autostart-Delay=5

@@ -44,7 +44,9 @@ SHELL_CONFIG=$(detect_shell_config)
 # Instala autostart para restaurar estado no login
 AUTOSTART_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/autostart"
 mkdir -p "$AUTOSTART_DIR"
-cp glowkey.desktop "$AUTOSTART_DIR/"
+# Substitui o placeholder pelo caminho real
+sed "s|@GLOWKEY_PATH@|$TARGET|g" glowkey.desktop > "$AUTOSTART_DIR/glowkey.desktop"
+chmod +x "$AUTOSTART_DIR/glowkey.desktop"
 echo "Auto-inicialização ativada (restaura estado na inicialização)"
 
 # Verifica se o PATH já está no PATH atual
