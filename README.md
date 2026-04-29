@@ -21,7 +21,7 @@ Então criei o GlowKey um script pequeno que usa `xset` pra restaurar esse contr
 Se você tem um teclado genérico com RGB que funciona no Windows mas fica apagado no Linux, provavelmente chegou no lugar certo.
 
 <div>
- <img src=".github/exemplo2.webp" width="780">
+ <img src=".github/exemplo.png" width="780">
 </div>
 
 GlowKey foi feito especialmente para:
@@ -87,7 +87,13 @@ cd glowkey
 Se o comando `glowkey` não for reconhecido depois, adicione ao PATH:
 
 ```bash
-export PATH="$HOME/.local/bin:$PATH"
+export PATH="$HOME/.local/share:$PATH"
+```
+
+## Desinstalação
+
+```bash
+./uninstall.sh
 ```
 
 ---
@@ -123,9 +129,11 @@ Vá em **Configurações → Teclado → Atalhos personalizados** e adicione:
 glowkey/
 ├── .github/
 │   ├── banner.png
-│   └── teclados-exemplo.png
+│   ├── exemplo.png
+│   └── exemplo2.webp
 ├── glowkey.sh
 ├── install.sh
+├── uninstall.sh
 ├── README.md
 └── LICENSE
 ```

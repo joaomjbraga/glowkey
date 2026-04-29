@@ -4,14 +4,14 @@
 
 set -eu
 
-TARGET="$HOME/.local/bin/glowkey"
+TARGET="$HOME/.local/share/glowkey"
 
 [ -f glowkey.sh ] || {
     echo "Erro: glowkey.sh não encontrado." >&2
     exit 1
 }
 
-mkdir -p "$HOME/.local/bin"
+mkdir -p "$HOME/.local/share"
 
 cp glowkey.sh "$TARGET"
 chmod +x "$TARGET"
@@ -27,12 +27,12 @@ echo "  glowkey status"
 echo
 
 case ":$PATH:" in
-  *":$HOME/.local/bin:"*)
-    echo "~/.local/bin já está no PATH."
+  *":$HOME/.local/share:"*)
+    echo "~/.local/share já está no PATH."
     ;;
   *)
     echo "Adicione ao seu shell:"
     echo
-    echo 'export PATH="$HOME/.local/bin:$PATH"'
+    echo 'export PATH="$HOME/.local/share:$PATH"'
     ;;
 esac

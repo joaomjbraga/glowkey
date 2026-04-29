@@ -18,7 +18,7 @@ require() {
 }
 
 state() {
-    xset q | awk '/Scroll Lock:/ {print $NF}'
+    LC_ALL=C xset q 2>/dev/null | awk '/Scroll Lock:/ {print $NF}'
 }
 
 on() {
@@ -32,11 +32,10 @@ off() {
 }
 
 toggle() {
-    if [ "$(state)" = "on" ]; then
-        off
-    else
-        on
-    fi
+    case "$(state)" in
+        on) off ;;
+        *) on ;;
+    esac
 }
 
 usage() {
