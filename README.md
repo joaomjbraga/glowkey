@@ -113,12 +113,25 @@ glowkey --help    # Mostra a ajuda
 
 ## Auto-inicialização
 
-O GlowKey salva automaticamente o estado do backlight toda vez que você usa `on`, `off` ou `toggle`. No próximo login, o estado será restaurado automaticamente via XDG Autostart.
+O GlowKey salva automaticamente o estado do backlight toda vez que você usa `on`, `off` ou `toggle`. No próximo login, o estado será restaurado automaticamente via XDG Autostart e/ou serviço systemd.
 
-Para desativar a auto-inicialização, remova o arquivo:
-
+Para desativar a auto-inicialização via XDG Autostart, remova o arquivo:
 ```bash
 rm ~/.config/autostart/glowkey.desktop
+```
+
+### Serviço systemd (Opcional)
+
+Além do XDG Autostart, o GlowKey instala um serviço systemd para usuários que preferem este método.
+
+Para verificar o status:
+```bash
+systemctl --user status glowkey.service
+```
+
+Para desativar:
+```bash
+systemctl --user disable glowkey.service
 ```
 
 ---

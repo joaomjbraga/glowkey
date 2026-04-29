@@ -47,7 +47,23 @@ mkdir -p "$AUTOSTART_DIR"
 # Substitui o placeholder pelo caminho real
 sed "s|@GLOWKEY_PATH@|$TARGET|g" glowkey.desktop > "$AUTOSTART_DIR/glowkey.desktop"
 chmod +x "$AUTOSTART_DIR/glowkey.desktop"
-echo "Auto-inicialização ativada (restaura estado na inicialização)"
+echo "Auto-inicialização ativada via XDG Autostart (restaura estado na inicialização)"
+
+# Instala systemd user service para restaurar estado no login
+SYSTEMD_DIR="$HOME/.local/share/systemd/user"
+mkdir -p "$SYSTEMD_DIR"
+# Substitui o placeholder pelo caminho real
+sed "s|@GLOWKEY_PATH@|$TARGET|g" glowkey.service > "$SYSTEMD_DIR/glowkey.service"
+
+# Habilita o serviço (se o systemctl estiver disponível)
+if command -v systemctl >/dev/null 2>&1; then
+    systemctl --user daemon-reload 2>/dev/null || true
+    systemctl --user enable glowkey.service 2>/dev/null && \
+        echo "Serviço systemd ativado (restaura estado na inicialização)"
+else
+    echo "systemctl não encontrado. Serviço copiado mas não ativado."
+    echo "Para ativar manualmente: systemctl --user enable glowkey.service"
+fi
 
 # Verifica se o PATH já está no PATH atual
 case ":$PATH:" in

@@ -14,6 +14,18 @@ if [ -f "$AUTOSTART_FILE" ]; then
     echo "Auto-inicialização removida."
 fi
 
+# Remove serviço systemd
+SYSTEMD_FILE="$HOME/.local/share/systemd/user/glowkey.service"
+if [ -f "$SYSTEMD_FILE" ]; then
+    # Desabilita o serviço (se o systemctl estiver disponível)
+    if command -v systemctl >/dev/null 2>&1; then
+        systemctl --user disable glowkey.service 2>/dev/null || true
+        systemctl --user daemon-reload 2>/dev/null || true
+    fi
+    rm -f "$SYSTEMD_FILE"
+    echo "Serviço systemd removido."
+fi
+
 # Remove diretório de estado
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/glowkey"
 if [ -d "$STATE_DIR" ]; then
