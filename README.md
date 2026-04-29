@@ -87,7 +87,7 @@ cd glowkey
 Se o comando `glowkey` não for reconhecido depois, adicione ao PATH:
 
 ```bash
-export PATH="$HOME/.local/bin:$PATH"
+export PATH="$HOME/.local/share:$PATH"
 ```
 
 ## Desinstalação
@@ -108,20 +108,6 @@ glowkey status    # Mostra o estado atual
 glowkey restore   # Restaura o último estado salvo
 glowkey --help    # Mostra a ajuda
 ```
-
----
-
-## Atalho no GNOME / Pop! OS
-
-O que eu mais gosto é mapear o `toggle` direto na tecla Scroll Lock. Fica natural demais.
-
-Vá em **Configurações → Teclado → Atalhos personalizados** e adicione:
-
-| Campo       | Valor            |
-| ----------- | ---------------- |
-| **Nome**    | GlowKey Toggle   |
-| **Comando** | `glowkey toggle` |
-| **Tecla**   | Scroll Lock      |
 
 ---
 
