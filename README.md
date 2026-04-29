@@ -105,6 +105,8 @@ glowkey on        # Liga a iluminação
 glowkey off       # Desliga a iluminação
 glowkey toggle    # Alterna entre ligado e desligado
 glowkey status    # Mostra o estado atual
+glowkey restore   # Restaura o último estado salvo
+glowkey --help    # Mostra a ajuda
 ```
 
 ---
@@ -120,6 +122,17 @@ Vá em **Configurações → Teclado → Atalhos personalizados** e adicione:
 | **Nome**    | GlowKey Toggle   |
 | **Comando** | `glowkey toggle` |
 | **Tecla**   | Scroll Lock      |
+
+---
+
+## Auto-inicialização
+
+O GlowKey salva automaticamente o estado do backlight toda vez que você usa `on`, `off` ou `toggle`. No próximo login, o estado será restaurado automaticamente via XDG Autostart.
+
+Para desativar a auto-inicialização, remova o arquivo:
+```bash
+rm ~/.config/autostart/glowkey.desktop
+```
 
 ---
 
