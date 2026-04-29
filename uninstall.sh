@@ -1,10 +1,10 @@
 #!/bin/sh
 
-# Remove o GlowKey instalado em ~/.local/share
+# Remove o GlowKey instalado em ~/.local/bin
 
 set -eu
 
-TARGET="$HOME/.local/share/glowkey"
+TARGET="$HOME/.local/bin/glowkey"
 
 # Remove arquivo de autostart
 AUTOSTART_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/autostart/glowkey.desktop"
@@ -27,3 +27,9 @@ if [ -f "$TARGET" ]; then
 else
     echo "GlowKey não está instalado em $TARGET"
 fi
+
+# Aviso sobre PATH
+echo
+echo "Lembre-se de remover as linhas do PATH dos arquivos de configuração:"
+echo "  ~/.profile ou ~/.zprofile (para sessão gráfica)"
+echo "  ~/.bashrc, ~/.zshrc ou ~/.config/fish/config.fish (para terminal)"

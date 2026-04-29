@@ -87,7 +87,7 @@ cd glowkey
 Se o comando `glowkey` não for reconhecido depois, adicione ao PATH:
 
 ```bash
-export PATH="$HOME/.local/share:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
 ```
 
 ## Desinstalação
