@@ -1,8 +1,5 @@
 #!/bin/sh
 
-# GlowKey
-# Controle do backlight do teclado usando Scroll Lock via X11/xset
-
 set -eu
 
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/glowkey"
@@ -30,15 +27,23 @@ state() {
 }
 
 on() {
-    xset led 3
-    echo "Scroll Lock ativado (backlight ligado)."
-    save_state "on"
+    if xset led 3 2>/dev/null; then
+        echo "Scroll Lock ativado (backlight ligado)."
+        save_state "on"
+    else
+        echo "Erro: Falha ao ligar backlight." >&2
+        return 1
+    fi
 }
 
 off() {
-    xset -led 3
-    echo "Scroll Lock desativado (backlight desligado)."
-    save_state "off"
+    if xset -led 3 2>/dev/null; then
+        echo "Scroll Lock desativado (backlight desligado)."
+        save_state "off"
+    else
+        echo "Erro: Falha ao desligar backlight." >&2
+        return 1
+    fi
 }
 
 toggle() {
@@ -46,20 +51,26 @@ toggle() {
     case "$current_state" in
         on) off ;;
         off) on ;;
-        *) 
+        *)
             echo "Aviso: estado atual não detectado, mantendo estado anterior." >&2
-            # Não faz nada - mantém estado atual
             ;;
     esac
 }
 
 restore() {
-    # Verifica se xset está disponível (silêncio no login)
     if ! command -v xset >/dev/null 2>&1; then
         exit 0
     fi
     
-    # Verifica se há sessão X11 ativa
+    # Tenta até 10 vezes (com 1s de intervalo) aguardar X11 estar pronto
+    for i in $(seq 1 10); do
+        if xset q >/dev/null 2>&1; then
+            break
+        fi
+        sleep 1
+    done
+    
+    # Se depois das tentativas X11 não estiver pronto, sai silenciosamente
     if ! xset q >/dev/null 2>&1; then
         exit 0
     fi
@@ -71,9 +82,13 @@ restore() {
             *) exit 0 ;;
         esac
     else
-        # Silencioso no login - usuário ainda não definiu estado
         exit 0
     fi
+}
+
+version() {
+    echo "GlowKey 1.0.0"
+    exit 0
 }
 
 usage() {
@@ -88,12 +103,16 @@ usage() {
     echo
     echo "Flags:"
     echo "  --help, -h  Mostra esta mensagem de ajuda"
+    echo "  --version   Mostra a versão"
     exit "${1:-1}"
 }
 
 case "${1:-}" in
     --help|-h)
         usage 0
+        ;;
+    --version)
+        version
         ;;
 esac
 
