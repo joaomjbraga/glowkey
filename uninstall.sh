@@ -53,9 +53,9 @@ for config_file in "$HOME/.bashrc" "$HOME/.zshrc" "$HOME/.profile" "$HOME/.zprof
         # Remove linhas com o marcador "GlowKey PATH" e a linha seguinte (que contém o PATH)
         # Usa abordagem mais segura com awk
         awk '
-            /\# GlowKey PATH/ { skip=1; next }
-            skip && /PATH.*\.local\/share/ { skip=0; next }
-            !skip { print }
+            /\# GlowKey PATH/ { in_glowkey=1; next }
+            in_glowkey && /PATH.*\.local\/share/ { in_glowkey=0; next }
+            !in_glowkey { print }
         ' "$config_file.bak" > "$config_file.tmp"
         
         if [ -s "$config_file.tmp" ]; then

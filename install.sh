@@ -15,7 +15,10 @@ FISH_LINE='set -gx PATH $HOME/.local/share $PATH'
 
 mkdir -p "$HOME/.local/share"
 
-cp glowkey.sh "$TARGET"
+cp glowkey.sh "$TARGET" || {
+    echo "Erro: Falha ao copiar arquivo para $TARGET." >&2
+    exit 1
+}
 chmod +x "$TARGET"
 
 echo "GlowKey instalado com sucesso em $TARGET"
@@ -85,14 +88,6 @@ case ":$PATH:" in
         ;;
 esac
 
-# Verifica se a instalação funcionou
-if command -v glowkey >/dev/null 2>&1; then
-    echo "Instalação verificada com sucesso."
-else
-    echo "Aviso: 'glowkey' ainda não está acessível. Reinicie o terminal ou execute:"
-    echo "  source $SHELL_CONFIG"
-fi
-
 # Verifica se já está no arquivo de configuração
 # Aceita tanto $HOME literal quanto o caminho expandido
 EXPANDED_PATH=$(eval echo "$HOME/.local/share")
@@ -130,4 +125,19 @@ else
     echo "$PATH_LINE" >> "$SHELL_CONFIG"
     echo "Arquivo $SHELL_CONFIG criado com o PATH configurado."
     echo "Reinicie o terminal ou execute: source $SHELL_CONFIG"
+fi
+
+# Verifica se a instalação funcionou
+if [ -x "$TARGET" ]; then
+    echo "Instalação verificada com sucesso."
+else
+    echo "Aviso: '$TARGET' não está acessível."
+fi
+
+# Verifica se o PATH foi configurado
+if command -v glowkey >/dev/null 2>&1; then
+    echo "glowkey está acessível no PATH atual."
+else
+    echo "Aviso: 'glowkey' ainda não está no PATH atual. Reinicie o terminal ou execute:"
+    echo "  source $SHELL_CONFIG"
 fi

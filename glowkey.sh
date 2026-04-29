@@ -59,6 +59,11 @@ restore() {
         exit 0
     fi
     
+    # Verifica se há sessão X11 ativa
+    if ! xset q >/dev/null 2>&1; then
+        exit 0
+    fi
+    
     if [ -f "$STATE_FILE" ]; then
         case "$(cat "$STATE_FILE")" in
             on) on ;;
