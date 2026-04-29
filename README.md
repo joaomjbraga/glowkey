@@ -6,7 +6,7 @@
 
 ## O que é isso?
 
-GlowKey nasceu de uma frustração real. Onde Tinha trocado meu teclado por um que é RGB e no Linux o LED simplesmente não ligava. Funcionava perfeitamente no Windows, mas no Linux nada, Zero. Escuridão total.
+GlowKey nasceu de uma frustração real. Onde tinha trocado meu teclado por um que é RGB e no Linux o LED simplesmente não ligava. Funcionava perfeitamente no Windows, mas no Linux nada, Zero. Escuridão total.
 
 Pesquisei bastante, testei alternativas, nada resolveu. Até que fui mais fundo e descobri que esses teclados usam o LED do Scroll Lock (LED 3) pra controlar o backlight e esse comportamento simplesmente não é ativado por padrão em ambientes X11.
 
@@ -107,37 +107,20 @@ glowkey toggle    # Alterna entre ligado e desligado
 glowkey status    # Mostra o estado atual
 glowkey restore   # Restaura o último estado salvo
 glowkey --help    # Mostra a ajuda
+glowkey --version  # Mostra a versão
 ```
 
 ---
 
 ## Auto-inicialização
 
-O GlowKey salva automaticamente o estado do backlight toda vez que você usa `on`, `off` ou `toggle`. No próximo login, o estado será restaurado automaticamente via XDG Autostart e/ou serviço systemd.
+O GlowKey salva automaticamente o estado do backlight toda vez que você usa `on`, `off` ou `toggle`. No próximo login, o estado será restaurado automaticamente via XDG Autostart.
 
 Para desativar a auto-inicialização via XDG Autostart, remova o arquivo:
 
 ```bash
 rm ~/.config/autostart/glowkey.desktop
 ```
-
-### Serviço systemd (Opcional)
-
-Além do XDG Autostart, o GlowKey instala um serviço systemd para usuários que preferem este método.
-
-Para verificar o status:
-
-```bash
-systemctl --user status glowkey.service
-```
-
-Para desativar:
-
-```bash
-systemctl --user disable glowkey.service
-```
-
----
 
 ## Contribuindo
 

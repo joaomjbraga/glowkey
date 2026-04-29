@@ -60,27 +60,6 @@ fi
 chmod +x "$AUTOSTART_DIR/glowkey.desktop"
 echo "Auto-inicialização ativada via XDG Autostart (restaura estado na inicialização)"
 
-SYSTEMD_DIR="$HOME/.local/share/systemd/user"
-mkdir -p "$SYSTEMD_DIR"
-
-sed "s|@GLOWKEY_PATH@|$TARGET|g" glowkey.service > "$SYSTEMD_DIR/glowkey.service" || {
-    echo "Erro: Falha ao processar template do serviço systemd." >&2
-    exit 1
-}
-if [ ! -s "$SYSTEMD_DIR/glowkey.service" ]; then
-    echo "Erro: Falha ao criar serviço systemd." >&2
-    exit 1
-fi
-
-if command -v systemctl >/dev/null 2>&1; then
-    systemctl --user daemon-reload 2>/dev/null || true
-    systemctl --user enable glowkey.service 2>/dev/null && \
-        echo "Serviço systemd ativado (restaura estado na inicialização)"
-else
-    echo "systemctl não encontrado. Serviço copiado mas não ativado."
-    echo "Para ativar manualmente: systemctl --user enable glowkey.service"
-fi
-
 case ":$PATH:" in
     *":$HOME/.local/share:"*)
         echo "$HOME/.local/share já está no PATH atual."
