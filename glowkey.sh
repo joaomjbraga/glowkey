@@ -47,18 +47,23 @@ toggle() {
         on) off ;;
         off) on ;;
         *) 
-            echo "Aviso: estado atual não detectado, ligando backlight por padrão." >&2
-            on 
+            echo "Aviso: estado atual não detectado, mantendo estado anterior." >&2
+            # Não faz nada - mantém estado atual
             ;;
     esac
 }
 
 restore() {
+    # Verifica se xset está disponível (silêncio no login)
+    if ! command -v xset >/dev/null 2>&1; then
+        exit 0
+    fi
+    
     if [ -f "$STATE_FILE" ]; then
         case "$(cat "$STATE_FILE")" in
             on) on ;;
             off) off ;;
-            *) echo "Erro: estado inválido no arquivo de estado." >&2; exit 1 ;;
+            *) exit 0 ;;
         esac
     else
         # Silencioso no login - usuário ainda não definiu estado

@@ -46,6 +46,10 @@ AUTOSTART_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/autostart"
 mkdir -p "$AUTOSTART_DIR"
 # Substitui o placeholder pelo caminho real
 sed "s|@GLOWKEY_PATH@|$TARGET|g" glowkey.desktop > "$AUTOSTART_DIR/glowkey.desktop"
+if [ ! -s "$AUTOSTART_DIR/glowkey.desktop" ]; then
+    echo "Erro: Falha ao criar arquivo de autostart." >&2
+    exit 1
+fi
 chmod +x "$AUTOSTART_DIR/glowkey.desktop"
 echo "Auto-inicialização ativada via XDG Autostart (restaura estado na inicialização)"
 
@@ -54,6 +58,10 @@ SYSTEMD_DIR="$HOME/.local/share/systemd/user"
 mkdir -p "$SYSTEMD_DIR"
 # Substitui o placeholder pelo caminho real
 sed "s|@GLOWKEY_PATH@|$TARGET|g" glowkey.service > "$SYSTEMD_DIR/glowkey.service"
+if [ ! -s "$SYSTEMD_DIR/glowkey.service" ]; then
+    echo "Erro: Falha ao criar serviço systemd." >&2
+    exit 1
+fi
 
 # Habilita o serviço (se o systemctl estiver disponível)
 if command -v systemctl >/dev/null 2>&1; then
@@ -86,10 +94,14 @@ else
 fi
 
 # Verifica se já está no arquivo de configuração
+# Aceita tanto $HOME literal quanto o caminho expandido
+EXPANDED_PATH=$(eval echo "$HOME/.local/share")
+
 if [ -f "$SHELL_CONFIG" ]; then
     case "$SHELL_CONFIG" in
         *fish*)
-            if grep -q 'set -gx PATH.*\$HOME/.local/share' "$SHELL_CONFIG" 2>/dev/null; then
+            if grep -q "set -gx PATH.*\$HOME/.local/share" "$SHELL_CONFIG" 2>/dev/null || \
+               grep -q "set -gx PATH.*$EXPANDED_PATH" "$SHELL_CONFIG" 2>/dev/null; then
                 echo "PATH já configurado em $SHELL_CONFIG"
             else
                 mkdir -p "$(dirname "$SHELL_CONFIG")"
@@ -101,7 +113,8 @@ if [ -f "$SHELL_CONFIG" ]; then
             fi
             ;;
         *)
-            if grep -q 'export PATH.*\$HOME/.local/share' "$SHELL_CONFIG" 2>/dev/null; then
+            if grep -q 'export PATH.*\$HOME/.local/share' "$SHELL_CONFIG" 2>/dev/null || \
+               grep -q "export PATH.*$EXPANDED_PATH" "$SHELL_CONFIG" 2>/dev/null; then
                 echo "PATH já configurado em $SHELL_CONFIG"
             else
                 echo "" >> "$SHELL_CONFIG"
