@@ -42,9 +42,14 @@ off() {
 }
 
 toggle() {
-    case "$(state)" in
+    current_state=$(state)
+    case "$current_state" in
         on) off ;;
-        *) on ;;
+        off) on ;;
+        *) 
+            echo "Aviso: estado atual não detectado, ligando backlight por padrão." >&2
+            on 
+            ;;
     esac
 }
 
@@ -56,8 +61,8 @@ restore() {
             *) echo "Erro: estado inválido no arquivo de estado." >&2; exit 1 ;;
         esac
     else
-        echo "Erro: nenhum estado salvo encontrado. Use 'glowkey on' ou 'glowkey off' primeiro." >&2
-        exit 1
+        # Silencioso no login - usuário ainda não definiu estado
+        exit 0
     fi
 }
 
@@ -76,6 +81,12 @@ usage() {
     exit "${1:-1}"
 }
 
+case "${1:-}" in
+    --help|-h)
+        usage 0
+        ;;
+esac
+
 require
 
 case "${1:-}" in
@@ -93,9 +104,6 @@ case "${1:-}" in
         ;;
     restore)
         restore
-        ;;
-    --help|-h)
-        usage 0
         ;;
     *)
         usage

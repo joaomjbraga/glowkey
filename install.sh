@@ -61,6 +61,14 @@ case ":$PATH:" in
         ;;
 esac
 
+# Verifica se a instalação funcionou
+if command -v glowkey >/dev/null 2>&1; then
+    echo "Instalação verificada com sucesso."
+else
+    echo "Aviso: 'glowkey' ainda não está acessível. Reinicie o terminal ou execute:"
+    echo "  source $SHELL_CONFIG"
+fi
+
 # Verifica se já está no arquivo de configuração
 if [ -f "$SHELL_CONFIG" ]; then
     case "$SHELL_CONFIG" in

@@ -1,0 +1,28 @@
+name: ShellCheck
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  shellcheck:
+    name: Run ShellCheck
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install ShellCheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+
+      - name: Run ShellCheck on glowkey.sh
+        run: shellcheck glowkey.sh
+
+      - name: Run ShellCheck on install.sh
+        run: shellcheck install.sh
+
+      - name: Run ShellCheck on uninstall.sh
+        run: shellcheck uninstall.sh
