@@ -5,7 +5,9 @@
 set -eu
 
 TARGET="$HOME/.local/share/glowkey"
+# shellcheck disable=SC2016
 PATH_LINE='export PATH="$HOME/.local/share:$PATH"'
+# shellcheck disable=SC2016
 FISH_LINE='set -gx PATH $HOME/.local/share $PATH'
 
 [ -f glowkey.sh ] || {
@@ -79,7 +81,7 @@ fi
 # Verifica se o PATH já está no PATH atual
 case ":$PATH:" in
     *":$HOME/.local/share:"*)
-        echo "~/.local/share já está no PATH atual."
+        echo "$HOME/.local/share já está no PATH atual."
         echo
         ;;
     *)
@@ -100,9 +102,11 @@ if [ -f "$SHELL_CONFIG" ]; then
                 echo "PATH já configurado em $SHELL_CONFIG"
             else
                 mkdir -p "$(dirname "$SHELL_CONFIG")"
-                echo "" >> "$SHELL_CONFIG"
-                echo "# GlowKey PATH" >> "$SHELL_CONFIG"
-                echo "$FISH_LINE" >> "$SHELL_CONFIG"
+                {
+                    echo ""
+                    echo "# GlowKey PATH"
+                    echo "$FISH_LINE"
+                } >> "$SHELL_CONFIG"
                 echo "PATH adicionado ao $SHELL_CONFIG"
                 echo "Reinicie o terminal ou execute: source $SHELL_CONFIG"
             fi
@@ -112,9 +116,12 @@ if [ -f "$SHELL_CONFIG" ]; then
                grep -q "export PATH.*$EXPANDED_PATH" "$SHELL_CONFIG" 2>/dev/null; then
                 echo "PATH já configurado em $SHELL_CONFIG"
             else
-                echo "" >> "$SHELL_CONFIG"
-                echo "# GlowKey PATH" >> "$SHELL_CONFIG"
-                echo "$PATH_LINE" >> "$SHELL_CONFIG"
+                mkdir -p "$(dirname "$SHELL_CONFIG")"
+                {
+                    echo ""
+                    echo "# GlowKey PATH"
+                    echo "$PATH_LINE"
+                } >> "$SHELL_CONFIG"
                 echo "PATH adicionado ao $SHELL_CONFIG"
                 echo "Reinicie o terminal ou execute: source $SHELL_CONFIG"
             fi
