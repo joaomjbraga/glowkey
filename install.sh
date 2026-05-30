@@ -125,3 +125,14 @@ else
     echo "Aviso: 'glowkey' ainda não está no PATH atual. Reinicie o terminal ou execute:"
     echo "  source $SHELL_CONFIG"
 fi
+
+# Tenta ativar o backlight imediatamente
+if "$TARGET" on 2>/dev/null; then
+    echo "Backlight do teclado ativado!"
+else
+    # X11 pode não estar disponível (ex: TTY/SSH); pré-salva estado para o próximo login
+    GLOWKEY_STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/glowkey"
+    mkdir -p "$GLOWKEY_STATE_DIR"
+    echo "on" > "$GLOWKEY_STATE_DIR/state"
+    echo "Estado 'on' salvo. O backlight será ativado no próximo login gráfico."
+fi

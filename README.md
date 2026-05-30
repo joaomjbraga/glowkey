@@ -84,6 +84,8 @@ cd glowkey
 ./install.sh
 ```
 
+Após a instalação, o GlowKey tenta ligar o backlight imediatamente. Se não estiver numa sessão X11 (ex: TTY/SSH), o estado é salvo como `on` e será ativado no próximo login gráfico.
+
 Se o comando `glowkey` não for reconhecido depois, adicione ao PATH:
 
 ```bash
@@ -114,7 +116,7 @@ glowkey --version  # Mostra a versão
 
 ## Auto-inicialização
 
-O GlowKey salva automaticamente o estado do backlight toda vez que você usa `on`, `off` ou `toggle`. No próximo login, o estado será restaurado automaticamente via XDG Autostart.
+O GlowKey salva automaticamente o estado do backlight toda vez que você usa `on`, `off` ou `toggle`. No próximo login, o estado será restaurado automaticamente via XDG Autostart. Se nunca tiver salvo um estado, o `restore` liga o backlight por omissão.
 
 Para desativar a auto-inicialização via XDG Autostart, remova o arquivo:
 

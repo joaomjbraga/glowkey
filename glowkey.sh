@@ -82,7 +82,7 @@ restore() {
             *) exit 0 ;;
         esac
     else
-        exit 0
+        on
     fi
 }
 
