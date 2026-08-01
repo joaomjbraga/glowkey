@@ -1,59 +1,64 @@
 #!/bin/sh
 
-# Remove o GlowKey instalado em ~/.local/share
-
 set -eu
 
-TARGET="$HOME/.local/share/glowkey"
+TARGET="$HOME/.local/bin/glowkey"
 PATH_PATTERN='GlowKey PATH'
 
-# Remove arquivo de autostart
 AUTOSTART_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/autostart/glowkey.desktop"
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/glowkey"
+
+echo "Desinstalando GlowKey..."
+echo
+
+# Remove autostart
 if [ -f "$AUTOSTART_FILE" ]; then
     rm -f "$AUTOSTART_FILE"
-    echo "Auto-inicialização removida."
+    echo "✓ Auto-inicialização removida."
 fi
 
-# Remove diretório de estado
-STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/glowkey"
+# Remove estado salvo
 if [ -d "$STATE_DIR" ]; then
     rm -rf "$STATE_DIR"
-    echo "Estado salvo removido."
+    echo "✓ Estado salvo removido."
 fi
 
 # Remove executável
 if [ -f "$TARGET" ]; then
     rm -f "$TARGET"
-    echo "GlowKey removido com sucesso."
+    echo "✓ Executável removido."
 else
-    echo "GlowKey não está instalado em $TARGET"
+    echo "Executável não encontrado."
 fi
 
-# Remove linhas do PATH dos arquivos de configuração
 echo
 echo "Limpando configurações do PATH..."
 
-for config_file in "$HOME/.bashrc" "$HOME/.zshrc" "$HOME/.profile" "$HOME/.zprofile" "$HOME/.config/fish/config.fish"; do
-    if [ -f "$config_file" ] && grep -q "$PATH_PATTERN" "$config_file" 2>/dev/null; then
-        # Cria backup
-        cp "$config_file" "$config_file.bak"
-        
-        # Remove linhas com o marcador "GlowKey PATH" e a linha seguinte (que contém o PATH)
-        # Usa abordagem mais segura com awk
+for config_file in \
+    "$HOME/.bashrc" \
+    "$HOME/.zshrc" \
+    "$HOME/.zprofile" \
+    "$HOME/.profile" \
+    "$HOME/.config/fish/config.fish"
+do
+    [ -f "$config_file" ] || continue
+
+    if grep -q "$PATH_PATTERN" "$config_file" 2>/dev/null; then
+
+        cp -p "$config_file" "$config_file.bak"
+
         awk '
-            /\# GlowKey PATH/ { in_glowkey=1; next }
-            in_glowkey && /PATH.*\.local\/share/ { in_glowkey=0; next }
-            !in_glowkey { print }
+            /^# GlowKey PATH$/ { skip=1; next }
+            skip && /(\.local\/bin)/ { skip=0; next }
+            !skip { print }
         ' "$config_file.bak" > "$config_file.tmp"
-        
-        if [ -s "$config_file.tmp" ]; then
-            mv "$config_file.tmp" "$config_file"
-            echo "  Removido do $config_file (backup: $config_file.bak)"
-        else
-            rm -f "$config_file.tmp"
-            echo "  Erro ao limpar $config_file, mantendo backup"
-        fi
+
+        mv "$config_file.tmp" "$config_file"
+
+        echo "✓ Limpo: $config_file"
+        echo "  Backup: $config_file.bak"
     fi
 done
 
-echo "Limpeza concluída."
+echo
+echo "GlowKey removido com sucesso."

@@ -1,30 +1,26 @@
 #!/bin/sh
 
-# Instala GlowKey em ~/.local/share
-
 set -eu
 
-TARGET="$HOME/.local/share/glowkey"
+TARGET_DIR="$HOME/.local/bin"
+TARGET="$TARGET_DIR/glowkey"
 
 # shellcheck disable=SC2016
-PATH_LINE='export PATH="$HOME/.local/share:$PATH"'
+PATH_LINE='export PATH="$HOME/.local/bin:$PATH"'
 # shellcheck disable=SC2016
-FISH_LINE='set -gx PATH $HOME/.local/share $PATH'
+FISH_LINE='set -gx PATH $HOME/.local/bin $PATH'
 
 [ -f glowkey.sh ] || {
     echo "Erro: glowkey.sh não encontrado." >&2
     exit 1
 }
 
-mkdir -p "$HOME/.local/share"
+mkdir -p "$TARGET_DIR"
 
-cp glowkey.sh "$TARGET" || {
-    echo "Erro: Falha ao copiar arquivo para $TARGET." >&2
-    exit 1
-}
-chmod +x "$TARGET"
+install -m755 glowkey.sh "$TARGET"
 
-echo "GlowKey instalado com sucesso em $TARGET"
+echo "GlowKey instalado em:"
+echo "  $TARGET"
 echo
 
 echo "Comandos disponíveis:"
@@ -35,12 +31,11 @@ echo "  glowkey status"
 echo
 
 detect_shell_config() {
-    shell_name=$(basename "${SHELL:-/bin/sh}")
-    case "$shell_name" in
-        bash)  echo "$HOME/.bashrc" ;;
-        zsh)   echo "$HOME/.zshrc" ;;
-        fish)  echo "$HOME/.config/fish/config.fish" ;;
-        *)     echo "$HOME/.profile" ;;
+    case "$(basename "${SHELL:-sh}")" in
+        bash) echo "$HOME/.bashrc" ;;
+        zsh) echo "$HOME/.zshrc" ;;
+        fish) echo "$HOME/.config/fish/config.fish" ;;
+        *) echo "$HOME/.profile" ;;
     esac
 }
 
@@ -49,90 +44,80 @@ SHELL_CONFIG=$(detect_shell_config)
 AUTOSTART_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/autostart"
 mkdir -p "$AUTOSTART_DIR"
 
-sed "s|@GLOWKEY_PATH@|$TARGET|g" glowkey.desktop > "$AUTOSTART_DIR/glowkey.desktop" || {
-    echo "Erro: Falha ao processar template do autostart." >&2
-    exit 1
-}
-if [ ! -s "$AUTOSTART_DIR/glowkey.desktop" ]; then
-    echo "Erro: Falha ao criar arquivo de autostart." >&2
+if [ ! -f glowkey.desktop ]; then
+    echo "Erro: glowkey.desktop não encontrado." >&2
     exit 1
 fi
+
+sed "s|@GLOWKEY_PATH@|$TARGET|g" glowkey.desktop \
+    > "$AUTOSTART_DIR/glowkey.desktop"
+
 chmod +x "$AUTOSTART_DIR/glowkey.desktop"
-echo "Auto-inicialização ativada via XDG Autostart (restaura estado na inicialização)"
+
+echo "Auto-inicialização configurada."
+echo
 
 case ":$PATH:" in
-    *":$HOME/.local/share:"*)
-        echo "$HOME/.local/share já está no PATH atual."
-        echo
+    *":$TARGET_DIR:"*)
+        echo "$TARGET_DIR já está no PATH."
         ;;
     *)
-        echo "Adicionando ~/.local/share ao PATH..."
-        echo
+        echo "Configurando PATH..."
+
+        case "$SHELL_CONFIG" in
+            *fish*)
+                if ! grep -q "$TARGET_DIR" "$SHELL_CONFIG" 2>/dev/null; then
+                    mkdir -p "$(dirname "$SHELL_CONFIG")"
+
+                    {
+                        echo
+                        echo "# GlowKey PATH"
+                        echo "$FISH_LINE"
+                    } >> "$SHELL_CONFIG"
+
+                    echo "PATH adicionado ao $SHELL_CONFIG"
+                fi
+                ;;
+            *)
+                if ! grep -q "$TARGET_DIR" "$SHELL_CONFIG" 2>/dev/null; then
+                    mkdir -p "$(dirname "$SHELL_CONFIG")"
+
+                    {
+                        echo
+                        echo "# GlowKey PATH"
+                        echo "$PATH_LINE"
+                    } >> "$SHELL_CONFIG"
+
+                    echo "PATH adicionado ao $SHELL_CONFIG"
+                fi
+                ;;
+        esac
         ;;
 esac
 
-EXPANDED_PATH="$HOME/.local/share"
-
-if [ -f "$SHELL_CONFIG" ]; then
-    case "$SHELL_CONFIG" in
-        *fish*)
-            if grep -q "set -gx PATH.*\$HOME/.local/share" "$SHELL_CONFIG" 2>/dev/null || \
-               grep -q "set -gx PATH.*$EXPANDED_PATH" "$SHELL_CONFIG" 2>/dev/null; then
-                echo "PATH já configurado em $SHELL_CONFIG"
-            else
-                mkdir -p "$(dirname "$SHELL_CONFIG")"
-                {
-                    echo ""
-                    echo "# GlowKey PATH"
-                    echo "$FISH_LINE"
-                } >> "$SHELL_CONFIG"
-                echo "PATH adicionado ao $SHELL_CONFIG"
-                echo "Reinicie o terminal ou execute: source $SHELL_CONFIG"
-            fi
-            ;;
-        *)
-            if grep -q 'export PATH.*\$HOME/.local/share' "$SHELL_CONFIG" 2>/dev/null || \
-               grep -q "export PATH.*$EXPANDED_PATH" "$SHELL_CONFIG" 2>/dev/null; then
-                echo "PATH já configurado em $SHELL_CONFIG"
-            else
-                mkdir -p "$(dirname "$SHELL_CONFIG")"
-                {
-                    echo ""
-                    echo "# GlowKey PATH"
-                    echo "$PATH_LINE"
-                } >> "$SHELL_CONFIG"
-                echo "PATH adicionado ao $SHELL_CONFIG"
-                echo "Reinicie o terminal ou execute: source $SHELL_CONFIG"
-            fi
-            ;;
-    esac
-else
-    mkdir -p "$(dirname "$SHELL_CONFIG")"
-    echo "$PATH_LINE" >> "$SHELL_CONFIG"
-    echo "Arquivo $SHELL_CONFIG criado com o PATH configurado."
-    echo "Reinicie o terminal ou execute: source $SHELL_CONFIG"
-fi
-
-if [ -x "$TARGET" ]; then
-    echo "Instalação verificada com sucesso."
-else
-    echo "Aviso: '$TARGET' não está acessível."
-fi
+echo
 
 if command -v glowkey >/dev/null 2>&1; then
-    echo "glowkey está acessível no PATH atual."
+    echo "GlowKey disponível no PATH."
 else
-    echo "Aviso: 'glowkey' ainda não está no PATH atual. Reinicie o terminal ou execute:"
+    echo "Reabra o terminal ou execute:"
+    echo
     echo "  source $SHELL_CONFIG"
+    echo
 fi
 
-# Tenta ativar o backlight imediatamente
-if "$TARGET" on 2>/dev/null; then
-    echo "Backlight do teclado ativado!"
+echo "Ativando iluminação..."
+
+if "$TARGET" on; then
+    echo "Backlight ativado."
 else
-    # X11 pode não estar disponível (ex: TTY/SSH); pré-salva estado para o próximo login
-    GLOWKEY_STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/glowkey"
-    mkdir -p "$GLOWKEY_STATE_DIR"
-    echo "on" > "$GLOWKEY_STATE_DIR/state"
-    echo "Estado 'on' salvo. O backlight será ativado no próximo login gráfico."
+    echo "Sessão gráfica ainda não disponível."
+    echo "O estado será restaurado automaticamente no próximo login."
+
+    STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/glowkey"
+    mkdir -p "$STATE_DIR"
+    echo "on" > "$STATE_DIR/state"
 fi
+
+echo
+echo "Instalação concluída."

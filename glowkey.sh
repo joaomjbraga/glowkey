@@ -2,6 +2,8 @@
 
 set -eu
 
+VERSION="1.1.0"
+
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/glowkey"
 STATE_FILE="$STATE_DIR/state"
 
@@ -10,76 +12,79 @@ save_state() {
     echo "$1" > "$STATE_FILE"
 }
 
-require() {
-    command -v xset >/dev/null 2>&1 || {
-        echo "Erro: xset não encontrado. Instale x11-xserver-utils." >&2
-        exit 1
-    }
+die() {
+    echo "Erro: $*" >&2
+    exit 1
+}
 
-    xset q >/dev/null 2>&1 || {
-        echo "Erro: sessão X11 não detectada." >&2
-        exit 1
-    }
+require() {
+    [ "${XDG_SESSION_TYPE:-x11}" = "x11" ] ||
+        die "GlowKey suporta apenas sessões X11."
+
+    command -v xset >/dev/null 2>&1 ||
+        die "xset não encontrado. Instale o pacote que fornece o comando 'xset'."
+
+    [ -n "${DISPLAY:-}" ] ||
+        die "DISPLAY não definido."
+
+    xset q >/dev/null 2>&1 ||
+        die "Não foi possível conectar ao servidor X11."
 }
 
 state() {
-    LC_ALL=C xset q 2>/dev/null | awk '/Scroll Lock:/ {print $NF}'
+    if LC_ALL=C xset q 2>/dev/null | grep -q "Scroll Lock:[[:space:]]*on"; then
+        echo "on"
+    else
+        echo "off"
+    fi
 }
 
 on() {
-    if xset led 3 2>/dev/null; then
+    if xset led named "Scroll Lock" 2>/dev/null; then
         echo "Scroll Lock ativado (backlight ligado)."
         save_state "on"
     else
-        echo "Erro: Falha ao ligar backlight." >&2
-        return 1
+        die "Falha ao ligar o backlight."
     fi
 }
 
 off() {
-    if xset -led 3 2>/dev/null; then
+    if xset -led named "Scroll Lock" 2>/dev/null; then
         echo "Scroll Lock desativado (backlight desligado)."
         save_state "off"
     else
-        echo "Erro: Falha ao desligar backlight." >&2
-        return 1
+        die "Falha ao desligar o backlight."
     fi
 }
 
 toggle() {
-    current_state=$(state)
-    case "$current_state" in
-        on) off ;;
-        off) on ;;
-        *)
-            echo "Aviso: estado atual não detectado, mantendo estado anterior." >&2
-            ;;
+    case "$(state)" in
+        on)  off ;;
+        off) on  ;;
+        *)   die "Estado atual não detectado." ;;
     esac
 }
 
 restore() {
-    if ! command -v xset >/dev/null 2>&1; then
-        exit 0
-    fi
-    
-    # Tenta até 10 vezes (com 1s de intervalo) aguardar X11 estar pronto
-    for i in $(seq 1 10); do
+    # Sai silenciosamente se não houver X11 disponível
+    command -v xset >/dev/null 2>&1 || exit 0
+
+    i=0
+    while [ "$i" -lt 10 ]; do
         if xset q >/dev/null 2>&1; then
             break
         fi
+        i=$((i + 1))
         sleep 1
     done
-    
-    # Se depois das tentativas X11 não estiver pronto, sai silenciosamente
-    if ! xset q >/dev/null 2>&1; then
-        exit 0
-    fi
-    
+
+    xset q >/dev/null 2>&1 || exit 0
+
     if [ -f "$STATE_FILE" ]; then
         case "$(cat "$STATE_FILE")" in
-            on) on ;;
+            on)  on  ;;
             off) off ;;
-            *) exit 0 ;;
+            *)   exit 0 ;;
         esac
     else
         on
@@ -87,7 +92,7 @@ restore() {
 }
 
 version() {
-    echo "GlowKey 1.0.0"
+    echo "GlowKey $VERSION"
     exit 0
 }
 
@@ -99,10 +104,10 @@ usage() {
     echo "  off       Desliga o backlight (Scroll Lock desativado)"
     echo "  toggle    Alterna entre ligado e desligado"
     echo "  status    Mostra o estado atual do Scroll Lock"
-    echo "  restore   Restaura o último estado salvo (usado na auto-inicialização)"
+    echo "  restore   Restaura o último estado salvo"
     echo
     echo "Flags:"
-    echo "  --help, -h  Mostra esta mensagem de ajuda"
+    echo "  --help, -h  Mostra esta ajuda"
     echo "  --version   Mostra a versão"
     exit "${1:-1}"
 }
